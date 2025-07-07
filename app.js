@@ -280,6 +280,18 @@ function selectFood(food) {
     elements.foodSearch.value = '';
 }
 
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        elements.themeToggle.innerHTML = '<i class="fas fa-sun text-yellow-300"></i>';
+        document.body.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+        elements.themeToggle.innerHTML = '<i class="fas fa-moon text-gray-600"></i>';
+        document.body.classList.remove('dark');
+    }
+}
+
 // Show custom food form
 function showCustomFoodForm() {
     elements.searchResults.classList.add('hidden');
