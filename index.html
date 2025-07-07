@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CM SPORT - Track & Stay Motivated</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .progress-gradient {
+            background: linear-gradient(90deg, #4ade80 0%, #3b82f6 50%, #f59e0b 100%);
+        }
+        
+        @media (max-width: 640px) {
+            .food-item {
+                grid-template-columns: 1fr auto;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- PWA Install Prompt -->
+    <div id="installContainer" class="fixed bottom-4 right-4 hidden">
+        <div class="bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-xs">
+            <p class="text-sm mb-2">Install CalorieMotivator for better experience?</p>
+            <div class="flex space-x-2">
+                <button id="installCancel" class="px-3 py-1 bg-gray-200 rounded text-sm">Later</button>
+                <button id="installButton" class="px-3 py-1 bg-blue-500 text-white rounded text-sm">Install</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-blue-600">Calorie<span class="text-orange-500">Motivator</span></h1>
+                <div class="flex items-center space-x-2">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200">
+                        <i class="fas fa-moon text-gray-600"></i>
+                    </button>
+                    <button id="settingsBtn" class="p-2 rounded-full hover:bg-gray-200">
+                        <i class="fas fa-cog text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-600 mt-1">Track your calories and stay motivated!</p>
+        </header>
+
+        <!-- Daily Progress -->
+        <section class="bg-white rounded-xl shadow p-6 mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold">Today's Progress</h2>
+                <span class="text-sm text-gray-500" id="currentDate">Loading...</span>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between mb-1">
+                    <span class="text-sm font-medium">Calories</span>
+                    <span class="text-sm font-medium"><span id="currentCalories">0</span>/<span id="dailyGoal">2000</span> kcal</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="calorieProgress" class="h-2.5 rounded-full progress-gradient" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-blue-50 p-2 rounded">
+                    <div class="text-blue-600 font-medium" id="proteinCount">0g</div>
+                    <div class="text-xs text-blue-500">Protein</div>
+                </div>
+                <div class="bg-green-50 p-2 rounded">
+                    <div class="text-green-600 font-medium" id="carbsCount">0g</div>
+                    <div class="text-xs text-green-500">Carbs</div>
+                </div>
+                <div class="bg-orange-50 p-2 rounded">
+                    <div class="text-orange-600 font-medium" id="fatCount">0g</div>
+                    <div class="text-xs text-orange-500">Fat</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Motivational Message -->
+        <div id="motivationBanner" class="bg-gradient-to-r from-blue-100 to-purple-100 border-l-4 border-blue-500 p-4 mb-6 rounded-lg hidden fade-in">
+            <div class="flex items-start">
+                <div class="mr-3 text-blue-500 text-xl">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800" id="motivationText">Loading motivational message...</p>
+                    <button id="closeMotivation" class="mt-2 text-xs text-blue-600 hover:underline">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Food Section -->
+        <section class="bg-white rounded-xl shadow p-6 mb-6">
+            <h2 class="text-lg font-semibold mb-4">Add Food</h2>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Search or add food</label>
+                <div class="flex">
+                    <input type="text" id="foodSearch" placeholder="e.g. Apple, Chicken Breast" 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500">
+                    <button id="searchFood" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div id="searchResults" class="mt-2 hidden">
+                    <div class="border border-gray-200 rounded-lg max-h-48 overflow-y-auto">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="customFoodForm" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Food Name</label>
+                        <input type="text" id="foodName" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Calories (per 100g)</label>
+                        <input type="number" id="foodCalories" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label>
+                        <input type="number" id="foodProtein" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label>
+                        <input type="number" id="foodCarbs" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fat (g)</label>
+                        <input type="number" id="foodFat" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="0">
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <button id="cancelCustomFood" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                        Cancel
+                    </button>
+                    <button id="addCustomFood" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                        Add Custom Food
+                    </button>
+                </div>
+            </div>
+            
+            <div id="selectedFoodSection" class="hidden">
+                <div class="border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="font-medium mb-2" id="selectedFoodName">Selected Food</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Amount (g)</label>
+                            <input type="number" id="foodAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg" value="100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Meal Time</label>
+                            <select id="mealTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="snack">Snack</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button id="addToJournal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Add to Journal
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button id="showCustomForm" class="text-blue-600 hover:underline text-sm">
+                    <i class="fas fa-plus mr-1"></i> Add custom food
+                </button>
+            </div>
+        </section>
+
+        <!-- Food Journal -->
+        <section class="bg-white rounded-xl shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">Today's Food Journal</h2>
+                <div class="flex space-x-2">
+                    <button id="filterAll" class="px-3 py-1 bg-blue-500 text-white rounded-full text-xs">All</button>
+                    <button id="filterBreakfast" class="px-3 py-1 bg-gray-200 rounded-full text-xs">Breakfast</button>
+                    <button id="filterLunch" class="px-3 py-1 bg-gray-200 rounded-full text-xs">Lunch</button>
+                    <button id="filterDinner" class="px-3 py-1 bg-gray-200 rounded-full text-xs">Dinner</button>
+                    <button id="filterSnacks" class="px-3 py-1 bg-gray-200 rounded-full text-xs">Snacks</button>
+                </div>
+            </div>
+            
+            <div id="foodJournal">
+                <div class="text-center py-8 text-gray-500" id="emptyJournalMessage">
+                    <i class="fas fa-utensils text-3xl mb-2"></i>
+                    <p>Your food journal is empty</p>
+                    <p class="text-sm mt-1">Add your first food item to get started!</p>
+                </div>
+                <!-- Food items will be added here -->
+            </div>
+            
+            <div class="mt-4 text-right">
+                <button id="clearJournal" class="text-red-500 hover:text-red-700 text-sm">
+                    <i class="fas fa-trash-alt mr-1"></i> Clear Journal
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2">
+        <button class="p-2 text-blue-500">
+            <i class="fas fa-home text-xl"></i>
+            <span class="block text-xs mt-1">Home</span>
+        </button>
+        <button class="p-2 text-gray-500">
+            <i class="fas fa-chart-line text-xl"></i>
+            <span class="block text-xs mt-1">Stats</span>
+        </button>
+        <button id="addFoodBtn" class="p-2 bg-blue-500 text-white rounded-full -mt-6 shadow-lg">
+            <i class="fas fa-plus text-2xl"></i>
+        </button>
+        <button class="p-2 text-gray-500">
+            <i class="fas fa-trophy text-xl"></i>
+            <span class="block text-xs mt-1">Goals</span>
+        </button>
+        <button class="p-2 text-gray-500">
+            <i class="fas fa-user text-xl"></i>
+            <span class="block text-xs mt-1">Profile</span>
+        </button>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Settings</h3>
+                <button id="closeSettings" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-medium mb-2">Daily Calorie Goal</h4>
+                <div class="flex items-center">
+                    <input type="number" id="calorieGoalInput" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg mr-2">
+                    <span>kcal</span>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-medium mb-2">Theme</h4>
+                <div class="flex space-x-2">
+                    <button data-theme="light" class="px-4 py-2 bg-gray-200 rounded-lg">Light</button>
+                    <button data-theme="dark" class="px-4 py-2 bg-gray-800 text-white rounded-lg">Dark</button>
+                    <button data-theme="system" class="px-4 py-2 bg-blue-500 text-white rounded-lg">System</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-medium mb-2">Motivational Messages</h4>
+                <label class="inline-flex items-center">
+                    <input type="checkbox" id="enableMotivation" class="rounded text-blue-500" checked>
+                    <span class="ml-2">Enable motivational messages</span>
+                </label>
+            </div>
+            
+            <div class="flex justify-end">
+                <button id="saveSettings" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const state = {
+            dailyGoal: 2000,
+            currentCalories: 0,
+            currentProtein: 0,
+            currentCarbs: 0,
+            currentFat: 0,
+            foodJournal: [],
+            selectedFood: null,
+            customFoods: [
+                { id: 1, name: "Chicken Breast", calories: 165, protein: 31, carbs: 0, fat: 3.6 },
+                { id: 2, name: "White Rice", calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
+                { id: 3, name: "Broccoli", calories: 34, protein: 2.8, carbs: 6.6, fat: 0.4 }
+            ],
+            motivationMessages: [
+                { id: 1, text: "Every small step counts! You're doing great!", minPercent: 0, maxPercent: 50 },
+                { id: 2, text: "You're halfway there! Keep up the good work!", minPercent: 50, maxPercent: 75 },
+                { id: 3, text: "You're 75% closer to your goal! Almost there!", minPercent: 75, maxPercent: 90 },
+                { id: 4, text: "Amazing! You've reached your daily goal!", minPercent: 90, maxPercent: 100 },
+                { id: 5, text: "You've exceeded your goal, but tomorrow is a new day!", minPercent: 100, maxPercent: 200 },
+                { id: 6, text: "Consistency is key! This is your 3rd day tracking!", streak: 3 },
+                { id: 7, text: "Believe in yourself! You can achieve your goals!", random: true },
+                { id: 8, text: "Your efforts today are your results tomorrow!", random: true }
+            ],
+            settings: {
+                theme: 'light',
+                motivationEnabled: true
+            },
+            streak: 0,
+            lastAccessDate: null
+        };
+
+        // DOM Elements
+        const elements = {
+            currentDate: document.getElementById('currentDate'),
+            currentCalories: document.getElementById('currentCalories'),
+            dailyGoal: document.getElementById('dailyGoal'),
+            calorieProgress: document.getElementById('calorieProgress'),
+            proteinCount: document.getElementById('proteinCount'),
+            carbsCount: document.getElementById('carbsCount'),
+            fatCount: document.getElementById('fatCount'),
+            motivationBanner: document.getElementById('motivationBanner'),
+            motivationText: document.getElementById('motivationText'),
+            closeMotivation: document.getElementById('closeMotivation'),
+            foodSearch: document.getElementById('foodSearch'),
+            searchFood: document.getElementById('searchFood'),
+            searchResults: document.getElementById('searchResults'),
+            customFoodForm: document.getElementById('customFoodForm'),
+            showCustomForm: document.getElementById('showCustomForm'),
+            cancelCustomFood: document.getElementById('cancelCustomFood'),
+            addCustomFood: document.getElementById('addCustomFood'),
+            foodName: document.getElementById('foodName'),
+            foodCalories: document.getElementById('foodCalories'),
+            foodProtein: document.getElementById('foodProtein'),
+            foodCarbs: document.getElementById('foodCarbs'),
+            foodFat: document.getElementById('foodFat'),
+            selectedFoodSection: document.getElementById('selectedFoodSection'),
+            selectedFoodName: document.getElementById('selectedFoodName'),
+            foodAmount: document.getElementById('foodAmount'),
+            mealTime: document.getElementById('mealTime'),
+            addToJournal: document.getElementById('addToJournal'),
+            foodJournal: document.getElementById('foodJournal'),
+            emptyJournalMessage: document.getElementById('emptyJournalMessage'),
+            clearJournal: document.getElementById('clearJournal'),
+            filterAll: document.getElementById('filterAll'),
+            filterBreakfast: document.getElementById('filterBreakfast'),
+            filterLunch: document.getElementById('filterLunch'),
+            filterDinner: document.getElementById('filterDinner'),
+            filterSnacks: document.getElementById('filterSnacks'),
+            settingsModal: document.getElementById('settingsModal'),
+            closeSettings: document.getElementById('closeSettings'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            calorieGoalInput: document.getElementById('calorieGoalInput'),
+            enableMotivation: document.getElementById('enableMotivation'),
+            saveSettings: document.getElementById('saveSettings'),
+            themeToggle: document.getElementById('themeToggle'),
+            addFoodBtn: document.getElementById('addFoodBtn'),
+            installContainer: document.getElementById('installContainer'),
+            installButton: document.getElementById('installButton'),
+            installCancel: document.getElementById('installCancel')
+        };
+
+        // Initialize the app
+        function init() {
+            loadState();
+            updateDate();
+            updateProgress();
+            renderFoodJournal();
+            setupEventListeners();
+            checkStreak();
+            showMotivationMessage();
+            
+            // Check if PWA is already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                elements.installContainer.classList.add('hidden');
+            } else {
+                // Show install prompt for mobile devices
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    setTimeout(() => {
+                        elements.installContainer.classList.remove('hidden');
+                    }, 5000);
+                }
+            }
+        }
+
+        // Load state from localStorage
+        function loadState() {
+            const savedState = localStorage.getItem('calorieMotivatorState');
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                Object.assign(state, parsedState);
+                
+                // Update UI with loaded state
+                elements.dailyGoal.textContent = state.dailyGoal;
+                elements.calorieGoalInput.value = state.dailyGoal;
+                elements.enableMotivation.checked = state.settings.motivationEnabled;
+                
+                // Apply theme
+                applyTheme(state.settings.theme);
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('calorieMotivatorState', JSON.stringify(state));
+        }
+
+        // Update current date display
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            elements.currentDate.textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Update progress bars and counts
+        function updateProgress() {
+            elements.currentCalories.textContent = state.currentCalories;
+            elements.proteinCount.textContent = `${state.currentProtein}g`;
+            elements.carbsCount.textContent = `${state.currentCarbs}g`;
+            elements.fatCount.textContent = `${state.currentFat}g`;
+            
+            const percentage = Math.min((state.currentCalories / state.dailyGoal) * 100, 100);
+            elements.calorieProgress.style.width = `${percentage}%`;
+            
+            // Change progress bar color based on percentage
+            if (percentage < 50) {
+                elements.calorieProgress.style.background = '#4ade80'; // green
+            } else if (percentage < 75) {
+                elements.calorieProgress.style.background = '#3b82f6'; // blue
+            } else if (percentage < 90) {
+                elements.calorieProgress.style.background = '#f59e0b'; // orange
+            } else {
+                elements.calorieProgress.style.background = '#ef4444'; // red
+            }
+        }
+
+        // Render food journal
+        function renderFoodJournal(filter = 'all') {
+            elements.foodJournal.innerHTML = '';
+            
+            const filteredItems = filter === 'all' 
+                ? state.foodJournal 
+                : state.foodJournal.filter(item => item.mealTime === filter);
+            
+            if (filteredItems.length === 0) {
+                elements.emptyJournalMessage.classList.remove('hidden');
+                return;
+            }
+            
+            elements.emptyJournalMessage.classList.add('hidden');
+            
+            // Group by meal time
+            const grouped = {};
+            filteredItems.forEach(item => {
+                if (!grouped[item.mealTime]) {
+                    grouped[item.mealTime] = [];
+                }
+                grouped[item.mealTime].push(item);
+            });
+            
+            // Render each group
+            for (const mealTime in grouped) {
+                const group = grouped[mealTime];
+                
+                // Meal time header
+                const mealHeader = document.createElement('div');
+                mealHeader.className = 'flex items-center mb-2 mt-4';
+                mealHeader.innerHTML = `
+                    <h3 class="font-medium capitalize">${mealTime}</h3>
+                    <span class="ml-2 text-sm text-gray-500">${group.reduce((sum, item) => sum + item.calories, 0)} kcal</span>
+                `;
+                elements.foodJournal.appendChild(mealHeader);
+                
+                // Food items
+                group.forEach(item => {
+                    const foodItem = document.createElement('div');
+                    foodItem.className = 'food-item grid grid-cols-3 gap-2 items-center p-3 bg-gray-50 rounded-lg mb-2';
+                    foodItem.innerHTML = `
+                        <div class="col-span-2">
+                            <div class="font-medium">${item.name}</div>
+                            <div class="text-sm text-gray-500">${item.amount}g • ${item.calories} kcal</div>
+                        </div>
+                        <div class="text-right">
+                            <button class="delete-food p-2 text-red-500 hover:text-red-700" data-id="${item.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+                    elements.foodJournal.appendChild(foodItem);
+                });
+            }
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-food').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteFoodItem(id);
+                });
+            });
+        }
+
+        // Search for food
+        function searchFood() {
+            const query = elements.foodSearch.value.trim().toLowerCase();
+            if (!query) return;
+            
+            // In a real app, this would be an API call
+            // For demo, we'll search our custom foods
+            const results = state.customFoods.filter(food => 
+                food.name.toLowerCase().includes(query)
+            );
+            
+            displaySearchResults(results);
+        }
+
+        // Display search results
+        function displaySearchResults(results) {
+            const resultsContainer = elements.searchResults.querySelector('div');
+            resultsContainer.innerHTML = '';
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="p-3 text-center text-gray-500">No results found</div>';
+                elements.searchResults.classList.remove('hidden');
+                return;
+            }
+            
+            results.forEach(food => {
+                const item = document.createElement('div');
+                item.className = 'p-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer';
+                item.innerHTML = `
+                    <div class="font-medium">${food.name}</div>
+                    <div class="text-sm text-gray-500">${food.calories} kcal per 100g • P:${food.protein}g C:${food.carbs}g F:${food.fat}g</div>
+                `;
+                item.addEventListener('click', () => selectFood(food));
+                resultsContainer.appendChild(item);
+            });
+            
+            // Add option to create custom food
+            const customOption = document.createElement('div');
+            customOption.className = 'p-3 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-blue-500 font-medium';
+            customOption.innerHTML = '<i class="fas fa-plus mr-2"></i> Add custom food';
+            customOption.addEventListener('click', showCustomFoodForm);
+            resultsContainer.appendChild(customOption);
+            
+            elements.searchResults.classList.remove('hidden');
+        }
+
+        // Select a food item
+        function selectFood(food) {
+            state.selectedFood = food;
+            elements.selectedFoodName.textContent = food.name;
+            elements.foodAmount.value = '100';
+            elements.searchResults.classList.add('hidden');
+            elements.customFoodForm.classList.add('hidden');
+            elements.selectedFoodSection.classList.remove('hidden');
+            elements.foodSearch.value = '';
+        }
+
+        // Show custom food form
+        function showCustomFoodForm() {
+            elements.searchResults.classList.add('hidden');
+            elements.customFoodForm.classList.remove('hidden');
+            elements.selectedFoodSection.classList.add('hidden');
+            elements.foodName.value = '';
+            elements.foodCalories.value = '';
+            elements.foodProtein.value = '0';
+            elements.foodCarbs.value = '0';
+            elements.foodFat.value = '0';
+            elements.foodSearch.value = '';
+        }
+
+        // Hide custom food form
+        function hideCustomFoodForm() {
+            elements.customFoodForm.classList.add('hidden');
+            elements.selectedFood = null;
+        }
+
+        // Add custom food
+        function addCustomFood() {
+            const name = elements.foodName.value.trim();
+            const calories = parseInt(elements.foodCalories.value);
+            const protein = parseInt(elements.foodProtein.value);
+            const carbs = parseInt(elements.foodCarbs.value);
+            const fat = parseInt(elements.foodFat.value);
+            
+            if (!name || isNaN(calories) || isNaN(protein) || isNaN(carbs) || isNaN(fat)) {
+                alert('Please fill all fields with valid numbers');
+                return;
+            }
+            
+            const newFood = {
+                id: state.customFoods.length > 0 ? Math.max(...state.customFoods.map(f => f.id)) + 1 : 1,
+                name,
+                calories,
+                protein,
+                carbs,
+                fat
+            };
+            
+            state.customFoods.push(newFood);
+            selectFood(newFood);
+            saveState();
+        }
+
+        // Add food to journal
+        function addFoodToJournal() {
+            if (!state.selectedFood) return;
+            
+            const amount = parseInt(elements.foodAmount.value);
+            const mealTime = elements.mealTime.value;
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            // Calculate nutrition based on amount
+            const ratio = amount / 100;
+            const calories = Math.round(state.selectedFood.calories * ratio);
+            const protein = Math.round(state.selectedFood.protein * ratio);
+            const carbs = Math.round(state.selectedFood.carbs * ratio);
+            const fat = Math.round(state.selectedFood.fat * ratio);
+            
+            const foodItem = {
+                id: Date.now(),
+                name: state.selectedFood.name,
+                amount,
+                calories,
+                protein,
+                carbs,
+                fat,
+                mealTime,
+                timestamp: new Date().toISOString()
+            };
+            
+            state.foodJournal.push(foodItem);
+            state.currentCalories += calories;
+            state.currentProtein += protein;
+            state.currentCarbs += carbs;
+            state.currentFat += fat;
+            
+            // Reset form
+            state.selectedFood = null;
+            elements.selectedFoodSection.classList.add('hidden');
+            
+            // Update UI
+            updateProgress();
+            renderFoodJournal();
+            saveState();
+            showMotivationMessage();
+        }
+
+        // Delete food item
+        function deleteFoodItem(id) {
+            const index = state.foodJournal.findIndex(item => item.id === id);
+            if (index === -1) return;
+            
+            const item = state.foodJournal[index];
+            state.currentCalories -= item.calories;
+            state.currentProtein -= item.protein;
+            state.currentCarbs -= item.carbs;
+            state.currentFat -= item.fat;
+            
+            state.foodJournal.splice(index, 1);
+            
+            updateProgress();
+            renderFoodJournal();
+            saveState();
+            showMotivationMessage();
+        }
+
+        // Clear journal
+        function clearJournal() {
+            if (!confirm('Are you sure you want to clear your food journal for today?')) return;
+            
+            state.foodJournal = [];
+            state.currentCalories = 0;
+            state.currentProtein = 0;
+            state.currentCarbs = 0;
+            state.currentFat = 0;
+            
+            updateProgress();
+            renderFoodJournal();
+            saveState();
+            showMotivationMessage();
+        }
+
+        // Check user streak
+        function checkStreak() {
+            const today = new Date().toDateString();
+            
+            if (state.lastAccessDate) {
+                const lastAccess = new Date(state.lastAccessDate);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (lastAccess.toDateString() === yesterday.toDateString()) {
+                    state.streak += 1;
+                } else if (lastAccess.toDateString() !== today) {
+                    state.streak = 1;
+                }
+            } else {
+                state.streak = 1;
+            }
+            
+            state.lastAccessDate = today;
+            saveState();
+        }
+
+        // Show motivational message
+        function showMotivationMessage() {
+            if (!state.settings.motivationEnabled) {
+                elements.motivationBanner.classList.add('hidden');
+                return;
+            }
+            
+            const percentage = (state.currentCalories / state.dailyGoal) * 100;
+            
+            // Find appropriate messages
+            const percentageMessages = state.motivationMessages.filter(m => 
+                m.minPercent !== undefined && 
+                percentage >= m.minPercent && 
+                percentage < m.maxPercent
+            );
+            
+            const streakMessages = state.streak >= 3 ? 
+                state.motivationMessages.filter(m => m.streak && state.streak >= m.streak) : [];
+            
+            const randomMessages = state.motivationMessages.filter(m => m.random);
+            
+            // Combine all possible messages
+            const possibleMessages = [...percentageMessages, ...streakMessages, ...randomMessages];
+            
+            if (possibleMessages.length === 0) {
+                elements.motivationBanner.classList.add('hidden');
+                return;
+            }
+            
+            // Select random message
+            const randomIndex = Math.floor(Math.random() * possibleMessages.length);
+            elements.motivationText.textContent = possibleMessages[randomIndex].text;
+            
+            // Show with animation
+            elements.motivationBanner.classList.remove('hidden');
+            elements.motivationBanner.classList.add('fade-in');
+        }
+
+        // Open settings modal
+        function openSettings() {
+            elements.settingsModal.classList.remove('hidden');
+        }
+
+        // Close settings modal
+        function closeSettings() {
+            elements.settingsModal.classList.add('hidden');
+        }
+
+        // Save settings
+        function saveSettings() {
+            const newGoal = parseInt(elements.calorieGoalInput.value);
+            if (!isNaN(newGoal) && newGoal > 0) {
+                state.dailyGoal = newGoal;
+                elements.dailyGoal.textContent = newGoal;
+            }
+            
+            state.settings.motivationEnabled = elements.enableMotivation.checked;
+            
+            updateProgress();
+            saveState();
+            closeSettings();
+            
+            if (state.settings.motivationEnabled) {
+                showMotivationMessage();
+            } else {
+                elements.motivationBanner.classList.add('hidden');
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            const newTheme = state.settings.theme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            state.settings.theme = newTheme;
+            saveState();
+        }
+
+        // Apply theme
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('bg-gray-900');
+                document.body.classList.remove('bg-gray-50');
+                elements.themeToggle.innerHTML = '<i class="fas fa-sun text-yellow-300"></i>';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.body.classList.remove('bg-gray-900');
+                document.body.classList.add('bg-gray-50');
+                elements.themeToggle.innerHTML = '<i class="fas fa-moon text-gray-600"></i>';
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Food search
+            elements.searchFood.addEventListener('click', searchFood);
+            elements.foodSearch.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchFood();
+            });
+            
+            // Custom food form
+            elements.showCustomForm.addEventListener('click', showCustomFoodForm);
+            elements.cancelCustomFood.addEventListener('click', hideCustomFoodForm);
+            elements.addCustomFood.addEventListener('click', addCustomFood);
+            
+            // Add to journal
+            elements.addToJournal.addEventListener('click', addFoodToJournal);
+            
+            // Journal management
+            elements.clearJournal.addEventListener('click', clearJournal);
+            
+            // Filter buttons
+            elements.filterAll.addEventListener('click', () => renderFoodJournal('all'));
+            elements.filterBreakfast.addEventListener('click', () => renderFoodJournal('breakfast'));
+            elements.filterLunch.addEventListener('click', () => renderFoodJournal('lunch'));
+            elements.filterDinner.addEventListener('click', () => renderFoodJournal('dinner'));
+            elements.filterSnacks.addEventListener('click', () => renderFoodJournal('snack'));
+            
+            // Motivation banner
+            elements.closeMotivation.addEventListener('click', () => {
+                elements.motivationBanner.classList.add('hidden');
+            });
+            
+            // Settings
+            elements.settingsBtn.addEventListener('click', openSettings);
+            elements.closeSettings.addEventListener('click', closeSettings);
+            elements.saveSettings.addEventListener('click', saveSettings);
+            elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // Add food button
+            elements.addFoodBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: elements.foodSearch.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+                elements.foodSearch.focus();
+            });
+            
+            // Click outside search results to close them
+            document.addEventListener('click', (e) => {
+                if (!elements.searchResults.contains(e.target) && e.target !== elements.foodSearch && e.target !== elements.searchFood) {
+                    elements.searchResults.classList.add('hidden');
+                }
+            });
+            
+            // PWA installation
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                elements.installContainer.classList.remove('hidden');
+            });
+            
+            elements.installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        elements.installContainer.classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            elements.installCancel.addEventListener('click', () => {
+                elements.installContainer.classList.add('hidden');
+            });
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+
+    <!-- Manifest for PWA -->
+    <script>
+        const manifest = {
+            "name": "CalorieMotivator",
+            "short_name": "CalMotiv",
+            "description": "Track your calories and stay motivated!",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#3b82f6",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "/icons/icon-512x512.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+        
+        const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        document.querySelector('link[rel="manifest"]').href = manifestURL;
+    </script>
+</body>
+</html>
