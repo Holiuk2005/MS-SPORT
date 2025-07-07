@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalorieMotivator - Track & Stay Motivated</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- PWA Install Prompt -->
+    <div id="installContainer" class="fixed bottom-4 right-4 hidden z-50">
+        <div class="bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-xs dark:bg-gray-700 dark:border-gray-600">
+            <p class="text-sm mb-2 dark:text-gray-200">Install CalorieMotivator for better experience?</p>
+            <div class="flex space-x-2">
+                <button id="installCancel" class="px-3 py-1 bg-gray-200 rounded text-sm dark:bg-gray-600 dark:text-gray-200">Later</button>
+                <button id="installButton" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">Install</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400">Calorie<span class="text-orange-500 dark:text-orange-400">Motivator</span></h1>
+                <div class="flex items-center space-x-2">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                        <i class="fas fa-moon text-gray-600 dark:text-yellow-300"></i>
+                    </button>
+                    <button id="settingsBtn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                        <i class="fas fa-cog text-gray-600 dark:text-gray-300"></i>
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-600 mt-1 dark:text-gray-400">Track your calories and stay motivated!</p>
+        </header>
+
+        <!-- Daily Progress -->
+        <section class="bg-white rounded-xl shadow p-6 mb-6 dark:dark-card">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-semibold dark:text-gray-200">Today's Progress</h2>
+                <span class="text-sm text-gray-500 dark:text-gray-400" id="currentDate">Loading...</span>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between mb-1">
+                    <span class="text-sm font-medium dark:text-gray-300">Calories</span>
+                    <span class="text-sm font-medium dark:text-gray-300"><span id="currentCalories">0</span>/<span id="dailyGoal">2000</span> kcal</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div id="calorieProgress" class="h-2.5 rounded-full progress-gradient" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-blue-50 p-2 rounded dark:bg-blue-900/30">
+                    <div class="text-blue-600 font-medium dark:text-blue-300" id="proteinCount">0g</div>
+                    <div class="text-xs text-blue-500 dark:text-blue-400">Protein</div>
+                </div>
+                <div class="bg-green-50 p-2 rounded dark:bg-green-900/30">
+                    <div class="text-green-600 font-medium dark:text-green-300" id="carbsCount">0g</div>
+                    <div class="text-xs text-green-500 dark:text-green-400">Carbs</div>
+                </div>
+                <div class="bg-orange-50 p-2 rounded dark:bg-orange-900/30">
+                    <div class="text-orange-600 font-medium dark:text-orange-300" id="fatCount">0g</div>
+                    <div class="text-xs text-orange-500 dark:text-orange-400">Fat</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Motivational Message -->
+        <div id="motivationBanner" class="bg-gradient-to-r from-blue-100 to-purple-100 border-l-4 border-blue-500 p-4 mb-6 rounded-lg hidden fade-in dark:from-blue-900/30 dark:to-purple-900/30 dark:border-blue-400">
+            <div class="flex items-start">
+                <div class="mr-3 text-blue-500 text-xl dark:text-blue-400">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-800 dark:text-gray-200" id="motivationText">Loading motivational message...</p>
+                    <button id="closeMotivation" class="mt-2 text-xs text-blue-600 hover:underline dark:text-blue-400">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Food Section -->
+        <section class="bg-white rounded-xl shadow p-6 mb-6 dark:dark-card">
+            <h2 class="text-lg font-semibold mb-4 dark:text-gray-200">Add Food</h2>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Search or add food</label>
+                <div class="flex">
+                    <input type="text" id="foodSearch" placeholder="e.g. Apple, Chicken Breast" 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <button id="searchFood" class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div id="searchResults" class="mt-2 hidden">
+                    <div class="border border-gray-200 rounded-lg max-h-48 overflow-y-auto dark:border-gray-600 dark:bg-gray-800">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="customFoodForm" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Food Name</label>
+                        <input type="text" id="foodName" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Calories (per 100g)</label>
+                        <input type="number" id="foodCalories" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Protein (g)</label>
+                        <input type="number" id="foodProtein" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Carbs (g)</label>
+                        <input type="number" id="foodCarbs" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="0">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Fat (g)</label>
+                        <input type="number" id="foodFat" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="0">
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <button id="cancelCustomFood" class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        Cancel
+                    </button>
+                    <button id="addCustomFood" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                        Add Custom Food
+                    </button>
+                </div>
+            </div>
+            
+            <div id="selectedFoodSection" class="hidden">
+                <div class="border-t border-gray-200 pt-4 mt-4 dark:border-gray-700">
+                    <h3 class="font-medium mb-2 dark:text-gray-300" id="selectedFoodName">Selected Food</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Amount (g)</label>
+                            <input type="number" id="foodAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" value="100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Meal Time</label>
+                            <select id="mealTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="snack">Snack</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button id="addToJournal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            Add to Journal
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button id="showCustomForm" class="text-blue-600 hover:underline text-sm dark:text-blue-400">
+                    <i class="fas fa-plus mr-1"></i> Add custom food
+                </button>
+            </div>
+        </section>
+
+        <!-- Food Journal -->
+        <section class="bg-white rounded-xl shadow p-6 dark:dark-card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold dark:text-gray-200">Today's Food Journal</h2>
+                <div class="flex space-x-2">
+                    <button id="filterAll" class="px-3 py-1 bg-blue-500 text-white rounded-full text-xs">All</button>
+                    <button id="filterBreakfast" class="px-3 py-1 bg-gray-200 rounded-full text-xs dark:bg-gray-700 dark:text-gray-300">Breakfast</button>
+                    <button id="filterLunch" class="px-3 py-1 bg-gray-200 rounded-full text-xs dark:bg-gray-700 dark:text-gray-300">Lunch</button>
+                    <button id="filterDinner" class="px-3 py-1 bg-gray-200 rounded-full text-xs dark:bg-gray-700 dark:text-gray-300">Dinner</button>
+                    <button id="filterSnacks" class="px-3 py-1 bg-gray-200 rounded-full text-xs dark:bg-gray-700 dark:text-gray-300">Snacks</button>
+                </div>
+            </div>
+            
+            <div id="foodJournal">
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400" id="emptyJournalMessage">
+                    <i class="fas fa-utensils text-3xl mb-2"></i>
+                    <p>Your food journal is empty</p>
+                    <p class="text-sm mt-1">Add your first food item to get started!</p>
+                </div>
+                <!-- Food items will be added here -->
+            </div>
+            
+            <div class="mt-4 text-right">
+                <button id="clearJournal" class="text-red-500 hover:text-red-700 text-sm dark:text-red-400">
+                    <i class="fas fa-trash-alt mr-1"></i> Clear Journal
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2 dark:bg-gray-800 dark:border-gray-700">
+        <button class="p-2 text-blue-500 dark:text-blue-400">
+            <i class="fas fa-home text-xl"></i>
+            <span class="block text-xs mt-1">Home</span>
+        </button>
+        <button class="p-2 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-chart-line text-xl"></i>
+            <span class="block text-xs mt-1">Stats</span>
+        </button>
+        <button id="addFoodBtn" class="p-2 bg-blue-500 text-white rounded-full -mt-6 shadow-lg hover:bg-blue-600">
+            <i class="fas fa-plus text-2xl"></i>
+        </button>
+        <button class="p-2 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-trophy text-xl"></i>
+            <span class="block text-xs mt-1">Goals</span>
+        </button>
+        <button class="p-2 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-user text-xl"></i>
+            <span class="block text-xs mt-1">Profile</span>
+        </button>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4 dark:bg-gray-800">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold dark:text-gray-200">Settings</h3>
+                <button id="closeSettings" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-medium mb-2 dark:text-gray-300">Daily Calorie Goal</h4>
+                <div class="flex items-center">
+                    <input type="number" id="calorieGoalInput" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg mr-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <span class="dark:text-gray-300">kcal</span>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-medium mb-2 dark:text-gray-300">Theme</h4>
+                <div class="flex space-x-2">
+                    <button data-theme="light" class="px-4 py-2 bg-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-300">Light</button>
+                    <button data-theme="dark" class="px-4 py-2 bg-gray-800 text-white rounded-lg dark:bg-gray-900">Dark</button>
+                    <button data-theme="system" class="px-4 py-2 bg-blue-500 text-white rounded-lg">System</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="font-medium mb-2 dark:text-gray-300">Motivational Messages</h4>
+                <label class="inline-flex items-center">
+                    <input type="checkbox" id="enableMotivation" class="rounded text-blue-500 dark:bg-gray-700" checked>
+                    <span class="ml-2 dark:text-gray-300">Enable motivational messages</span>
+                </label>
+            </div>
+            
+            <div class="flex justify-end">
+                <button id="saveSettings" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
