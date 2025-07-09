@@ -110,19 +110,12 @@ function init() {
 
 // Load state from localStorage
 function loadState() {
-    const savedState = localStorage.getItem('calorieMotivatorState');
-    if (savedState) {
-        const parsedState = JSON.parse(savedState);
-        Object.assign(state, parsedState);
-        
-        // Update UI with loaded state
-        elements.dailyGoal.textContent = state.dailyGoal;
-        elements.calorieGoalInput.value = state.dailyGoal;
-        elements.enableMotivation.checked = state.settings.motivationEnabled;
-        
-        // Apply theme
-        applyTheme(state.settings.theme);
-    }
+  // Add this at the beginning of the function:
+  if (state.settings.theme === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
 }
 
 // Save state to localStorage
@@ -139,24 +132,12 @@ function updateDate() {
 
 // Update progress bars and counts
 function updateProgress() {
-    elements.currentCalories.textContent = state.currentCalories;
-    elements.proteinCount.textContent = `${state.currentProtein}g`;
-    elements.carbsCount.textContent = `${state.currentCarbs}g`;
-    elements.fatCount.textContent = `${state.currentFat}g`;
-    
-    const percentage = Math.min((state.currentCalories / state.dailyGoal) * 100, 100);
-    elements.calorieProgress.style.width = `${percentage}%`;
-    
-    // Change progress bar color based on percentage
-    if (percentage < 50) {
-        elements.calorieProgress.style.background = '#4ade80'; // green
-    } else if (percentage < 75) {
-        elements.calorieProgress.style.background = '#3b82f6'; // blue
-    } else if (percentage < 90) {
-        elements.calorieProgress.style.background = '#f59e0b'; // orange
-    } else {
-        elements.calorieProgress.style.background = '#ef4444'; // red
-    }
+  // Replace existing calculation with:
+  const percentage = state.dailyGoal > 0 
+    ? Math.min((state.currentCalories / state.dailyGoal) * 100, 100) 
+    : 0;
+  
+  elements.calorieProgress.style.width = `${percentage}%`;
 }
 
 // Render food journal
@@ -280,18 +261,6 @@ function selectFood(food) {
     elements.foodSearch.value = '';
 }
 
-function applyTheme(theme) {
-    if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-        elements.themeToggle.innerHTML = '<i class="fas fa-sun text-yellow-300"></i>';
-        document.body.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-        elements.themeToggle.innerHTML = '<i class="fas fa-moon text-gray-600"></i>';
-        document.body.classList.remove('dark');
-    }
-}
-
 // Show custom food form
 function showCustomFoodForm() {
     elements.searchResults.classList.add('hidden');
@@ -345,23 +314,15 @@ function addCustomFood() {
 
 // Add food to journal
 function addFoodToJournal() {
-    if (!state.selectedFood) return;
-    
-    const amount = parseInt(elements.foodAmount.value);
+    const amount = parseFloat(elements.foodAmount.value);
     const mealTime = elements.mealTime.value;
-    
-    if (isNaN(amount) || amount <= 0) {
-        alert('Please enter a valid amount');
-        return;
-    }
-    
-    // Calculate nutrition based on amount
     const ratio = amount / 100;
-    const calories = Math.round(state.selectedFood.calories * ratio);
-    const protein = Math.round(state.selectedFood.protein * ratio);
-    const carbs = Math.round(state.selectedFood.carbs * ratio);
-    const fat = Math.round(state.selectedFood.fat * ratio);
-    
+
+    const calories = parseFloat((state.selectedFood.calories * ratio).toFixed(1));
+    const protein = parseFloat((state.selectedFood.protein * ratio).toFixed(1));
+    const carbs = parseFloat((state.selectedFood.carbs * ratio).toFixed(1));
+    const fat = parseFloat((state.selectedFood.fat * ratio).toFixed(1));
+
     const foodItem = {
         id: Date.now(),
         name: state.selectedFood.name,
@@ -373,23 +334,22 @@ function addFoodToJournal() {
         mealTime,
         timestamp: new Date().toISOString()
     };
-    
+
     state.foodJournal.push(foodItem);
     state.currentCalories += calories;
     state.currentProtein += protein;
     state.currentCarbs += carbs;
     state.currentFat += fat;
-    
-    // Reset form
+
     state.selectedFood = null;
     elements.selectedFoodSection.classList.add('hidden');
-    
-    // Update UI
+
     updateProgress();
     renderFoodJournal();
     saveState();
     showMotivationMessage();
 }
+
 
 // Delete food item
 function deleteFoodItem(id) {
@@ -579,6 +539,7 @@ function setupEventListeners() {
             const theme = button.getAttribute('data-theme');
             applyTheme(theme);
             state.settings.theme = theme;
+            saveState();
         });
     });
     

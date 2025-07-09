@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalorieMotivator - Track & Stay Motivated</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CalorieMotivator - Track & Stay Motivated</title>
+  <link href="/dist/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body class="bg-gray-50 min-h-screen dark:bg-gray-900">
     <!-- PWA Install Prompt -->
-    <div id="installContainer" class="fixed bottom-4 right-4 hidden z-50">
-        <div class="bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-xs dark:bg-gray-700 dark:border-gray-600">
-            <p class="text-sm mb-2 dark:text-gray-200">Install CalorieMotivator for better experience?</p>
-            <div class="flex space-x-2">
-                <button id="installCancel" class="px-3 py-1 bg-gray-200 rounded text-sm dark:bg-gray-600 dark:text-gray-200">Later</button>
-                <button id="installButton" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">Install</button>
-            </div>
+    <div id="installContainer" class="hidden fixed bottom-4 left-4 right-4 bg-white shadow-lg rounded-lg p-4 dark:bg-gray-800">
+        <p class="mb-4 dark:text-gray-300">Install CalorieMotivator for better experience?</p>
+        <div class="flex space-x-4">
+            <button id="installCancel" class="px-4 py-2 bg-gray-200 rounded-lg dark:bg-gray-600 dark:text-white">Later</button>
+            <button id="installButton" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Install</button>
         </div>
     </div>
 
@@ -40,7 +37,7 @@
         </header>
 
         <!-- Daily Progress -->
-        <section class="bg-white rounded-xl shadow p-6 mb-6 dark:dark-card">
+        <section class="bg-white rounded-xl shadow p-6 mb-6 dark:bg-gray-800">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-lg font-semibold dark:text-gray-200">Today's Progress</h2>
                 <span class="text-sm text-gray-500 dark:text-gray-400" id="currentDate">Loading...</span>
@@ -86,7 +83,7 @@
         </div>
 
         <!-- Add Food Section -->
-        <section class="bg-white rounded-xl shadow p-6 mb-6 dark-card">
+        <section class="bg-white rounded-xl shadow p-6 mb-6 dark:bg-gray-800">
             <h2 class="text-lg font-semibold mb-4 dark:text-gray-200">Add Food</h2>
             
             <div class="mb-4">
@@ -178,7 +175,7 @@
         </section>
 
         <!-- Food Journal -->
-        <section class="bg-white rounded-xl shadow p-6 dark:dark-card">
+        <section class="bg-white rounded-xl shadow p-6 dark:bg-gray-800">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-semibold dark:text-gray-200">Today's Food Journal</h2>
                 <div class="flex space-x-2">
